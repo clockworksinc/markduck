@@ -1,5 +1,6 @@
 import { CreateElement } from 'vue';
 import unified, { Plugin, Settings } from 'unified';
+import rehypeRaw from 'rehype-raw';
 import remarkParse from 'remark-parse';
 import remarkToRehype from 'remark-rehype';
 import remarkGfm from 'remark-gfm';
@@ -14,7 +15,12 @@ export type Option = {
   rehypePlugins?: PluginOption[];
 };
 
-const convert = (createElement: CreateElement, markdown: string, option: Option) => {
+const convert = (
+  createElement: CreateElement,
+  markdown: string,
+  option: Option,
+  childProps?: { [key: string]: any },
+) => {
   const remarkPlugins = option?.remarkPlugins || [];
   const rehypePlugins = option?.rehypePlugins || [];
 
@@ -22,6 +28,7 @@ const convert = (createElement: CreateElement, markdown: string, option: Option)
     createElement,
     components: option.components,
     sanitizeScheme: option.sanitizeScheme,
+    childProps,
   };
 
   // prettier-ignore
@@ -29,7 +36,8 @@ const convert = (createElement: CreateElement, markdown: string, option: Option)
     remarkGfm,
     remarkParse,
     ...remarkPlugins,
-    remarkToRehype,
+    [remarkToRehype, {allowDangerousHtml: true}],
+    rehypeRaw,
     ...rehypePlugins,
     [remarkVue, remarkVueOption]
   ];

@@ -12,6 +12,7 @@ export type UserRemarkVueOption = {
   createElement: CreateElement;
   components?: ComponentRegisterOption;
   sanitizeScheme?: object;
+  childProps?: { [key: string]: any };
 };
 export type RemarkVueOption = Required<UserRemarkVueOption>;
 
@@ -24,6 +25,7 @@ export default function remarkVue(_options: UserRemarkVueOption) {
     ..._options,
     components: _options?.components || {},
     sanitizeScheme: _options?.sanitizeScheme || null,
+    childProps: _options?.childProps || {},
   };
 
   function hFactory(createElement: CreateElement) {
@@ -31,6 +33,12 @@ export default function remarkVue(_options: UserRemarkVueOption) {
       const compOrFunc = options.components[name];
       const custom = isFunc(compOrFunc) ? compOrFunc(nodeData) : compOrFunc;
       const component = custom || name;
+      if (custom) {
+        nodeData.props = {
+          ...nodeData.props,
+          ...options.childProps,
+        };
+      }
       return createElement(component, nodeData, children);
     };
   }
